@@ -27,8 +27,12 @@ def notify(msg):
 
 
 def check(page, d):
-    page.goto(url_for(d), wait_until="networkidle", timeout=60000)
-    page.wait_for_timeout(2000)
+    page.goto(url_for(d), wait_until="domcontentloaded", timeout=60000)
+    try:
+        page.get_by_text(re.compile(re.escape(TIME_TEXT))).first.wait_for(timeout=20000)
+    except Exception:
+        pass
+    page.wait_for_timeout(1500)
     slots = page.get_by_text(re.compile(re.escape(TIME_TEXT))).all()
     if not slots:
         return False, "7:20 회차 없음"
