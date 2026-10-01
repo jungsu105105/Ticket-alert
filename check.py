@@ -3,9 +3,11 @@ from urllib.parse import quote
 from playwright.sync_api import sync_playwright
 
 BASE = "https://m.booking.naver.com/booking/12/bizes/233651/items/3056171"
-DATES = ["2026-10-04", "2026-10-10"]
+DATES = ["2026-11-07"]
 TIME_TEXT = "7:20"
 NEED = 2
+ROUNDS = 3        # 한 번 실행할 때 확인하는 횟수
+WAIT = 75         # 확인 사이 간격(초)
 TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 
@@ -27,8 +29,6 @@ def notify(msg):
 def check(page, d):
     page.goto(url_for(d), wait_until="networkidle", timeout=60000)
     page.wait_for_timeout(2000)
-    print(f"===== {d} 화면 텍스트 =====")
-    print(page.inner_text("body")[:1500])
     slots = page.get_by_text(re.compile(re.escape(TIME_TEXT))).all()
     if not slots:
         return False, "7:20 회차 없음"
@@ -63,13 +63,19 @@ with sync_playwright() as p:
         user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
     )
     page = ctx.new_page()
-    for d in DATES:
-        try:
-            ok, info = check(page, d)
-        except Exception as e:
-            ok, info = False, f"오류: {e}"
-        print(">>>", d, "가능" if ok else "불가", "|", info)
-        if ok:
-            notify(f"🎫 {d} 오후 7:20 자리 생김! ({NEED}장)\n{url_for(d)}")
-        time.sleep(3)
+    done = False
+    for i in range(ROUNDS):
+        for d in DATES:
+            try:
+                ok, info = check(page, d)
+            except Exception as e:
+                ok, info = False, f"오류: {e}"
+            print(time.strftime("%H:%M:%S"), ">>>", d, "가능" if ok else "불가", "|", info)
+            if ok:
+                notify(f"🎫 {d} 오후 7:20 자리 생김! ({NEED}장)\n{url_for(d)}")
+                done = True
+        if done:
+            break
+        if i < ROUNDS - 1:
+            time.sleep(WAIT)
     b.close()
