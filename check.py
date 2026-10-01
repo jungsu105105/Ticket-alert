@@ -27,9 +27,9 @@ def notify(msg):
 
 
 def check(page, d):
-    page.goto(url_for(d), wait_until="domcontentloaded", timeout=60000)
+    page.goto(url_for(d), wait_until="domcontentloaded", timeout=30000)
     try:
-        page.get_by_text(re.compile(re.escape(TIME_TEXT))).first.wait_for(timeout=20000)
+        page.get_by_text(re.compile(re.escape(TIME_TEXT))).first.wait_for(timeout=10000)
     except Exception:
         pass
     page.wait_for_timeout(1500)
