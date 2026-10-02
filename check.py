@@ -3,11 +3,11 @@ from urllib.parse import quote
 from playwright.sync_api import sync_playwright
 
 BASE = "https://m.booking.naver.com/booking/12/bizes/233651/items/3056171"
-DATES = ["2026-11-07"]
+DATES = ["2026-10-10", "2026-11-07"]
 TIME_TEXT = "7:20"
 NEED = 2
 ROUNDS = 3        # 한 번 실행할 때 확인하는 횟수
-WAIT = 75         # 확인 사이 간격(초)
+WAIT = 60         # 확인 사이 간격(초)
 TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 
